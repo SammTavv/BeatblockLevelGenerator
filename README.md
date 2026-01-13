@@ -1,4 +1,4 @@
-# BeatblockLevelGenerator
+# Beatblock Level Generator
 A console application to automatically generate custom levels for Beatblock.
 
 ### Setup
@@ -11,7 +11,7 @@ After it has successfully generated notes, refresh the Custom Levels page to vie
 ### Functionality
 The program will place [note events](https://docs.google.com/document/d/1myd85jpTYQCtE1Mlu6fJEm3fJEIN_-7Q1TFcB1OcrT4/edit?pli=1&tab=t.0#heading=h.o5fxa6zbzwv3)
 based on MIDI notes, randomly choosing an angle.\
-Some notes will have specific properties based on the MIDI notes, for example, **Bounce**s, **Hold**s and **Minehold**s will end on the next note.\
+Some notes will have specific properties based on MIDI notes, for example, **Bounce**s, **Hold**s and **Minehold**s will end on the next note.\
 MIDI tempo and swing changes won't affect note placements.
 
 ### Generator settings
@@ -29,3 +29,7 @@ You can change the level generation settings by typing `s` in the console. Here 
 - max bounces: how many times **Bounce** notes have to bounce before the next note
 - max angle spread: the maximum angle between every note (0 for no angle spread)
 - random colors: whether to randomly generate the level colors (0 for false, anything else for true)
+
+### Extra
+In the release i included a demo level made with Beatblock Level Generator using the default settings. You can copy the midi and song files to test how it works!\
+Aight this took me like 6 days im tired, have fun lol
