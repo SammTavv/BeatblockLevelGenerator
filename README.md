@@ -1,5 +1,5 @@
 # Beatblock Level Generator
-A console application to automatically generate custom levels for Beatblock.
+A console application that automatically generates custom levels for Beatblock.
 
 ### Setup
 Install the latest release and run `BeatblockLevelGenerator.exe`.\
