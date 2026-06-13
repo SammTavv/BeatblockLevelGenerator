@@ -125,7 +125,7 @@ namespace BeatblockLevelMaker
 
                     File.WriteAllText($@"{levelPath}\chart-var.json", "");
                     File.WriteAllText($@"{levelPath}\manifest.json", $"" +
-                        $"{{\"defaultVariant\":\"var\",\"metadata\":{{\"artist\":\"Artist\",\"artistLink\":\"\",\"bg\":false,\"charter\":\"Charter\",\"description\":\"\",\"difficulty\":0,\"lightWarning\":false,\"loopPointsEnable\":false,\"lyricsWarning\":false,\"songName\":\"{name}\"}}\r\n,\"properties\":{{\"formatversion\":17}}\r\n,\"variants\":[{{\"charter\":\"\",\"difficulty\":0,\"display\":\"var\",\"hidden\":false,\"name\":\"var\",\"slot\":0}}\r\n]}}");
+                        $"{{\"defaultVariant\":\"var\",\"metadata\":{{\"artist\":\"Artist\",\"artistLink\":\"\",\"bg\":false,\"charter\":\"Charter\",\"description\":\"\",\"difficulty\":0,\"lightWarning\":false,\"loopPointsEnable\":false,\"lyricsWarning\":false,\"songName\":\"{name}\"}}\r\n,\"properties\":{{\"formatversion\":19}}\r\n,\"variants\":[{{\"charter\":\"\",\"difficulty\":0,\"display\":\"var\",\"hidden\":false,\"name\":\"var\",\"slot\":0}}\r\n]}}");
                     File.WriteAllText($@"{levelPath}\level.json", "");
 
                     ProcessStartInfo psi = new()
@@ -167,12 +167,12 @@ namespace BeatblockLevelMaker
                         $"{{\"events\":[{{\"angle\":0,\"bpm\":{bpm},\"file\":\"mus.ogg\",\"time\":0,\"type\":\"play\",\"volume\":1}}\r\n,");
 
                     // -- USING BEATTOOLS --
-                    Intro();
+                    /*Intro();
                     Console.WriteLine("Is the \"BeatTools\" mod enabled (true/false):");
 
                     string modInput = Console.ReadLine();
 
-                    usingMod = bool.Parse(modInput);
+                    usingMod = bool.Parse(modInput);*/
 
                     // -- END MENU --
                     File.WriteAllText("path.txt", levelPath);
@@ -284,7 +284,7 @@ namespace BeatblockLevelMaker
                     }
 
                     File.AppendAllText($@"{levelPath}\level.json", $"" +
-                        $",\"formatversion\":17,\"offset\":8,\"speed\":70}}\r\n}}\r\n");
+                        $",\"properties\":{{\"formatversion\":19,\"offset\":8,\"speed\":70}}\r\n}}\r\n\r\n");
                 }
             }
             appendLevelData = false;
@@ -342,17 +342,32 @@ namespace BeatblockLevelMaker
         }
         private static string PickNoteType(Random rand)
         {
-            double choice = rand.NextDouble();
+            (string, string)[] noteTypes =
+            [
+                ("extraTap", "extra tap chance"),
+                ("block", "block chance"),
+                ("bounce", "bounce chance"),
+                ("hold", "hold chance"),
+                ("mineHold", "mine hold chance"),
+                ("mine", "mine chance"),
+                ("side", "side chance"),
+                ("inverse", "inverse chance")
+            ];
 
-            if (choice < GetSetting("extra tap chance")) return "extraTap";
-            if (choice < GetSetting("block chance")) return "block";
-            if (choice < GetSetting("bounce chance")) return "bounce";
-            if (choice < GetSetting("hold chance")) return "hold";
-            if (choice < GetSetting("mine hold chance")) return "mineHold";
-            if (choice < GetSetting("mine chance")) return "mine";
-            if (choice < GetSetting("side chance")) return "side";
-            if (choice < GetSetting("inverse chance")) return "inverse";
-            return "";
+            List<string> possibleTypes = [];
+
+            foreach (var (type, setting) in noteTypes)
+            {
+                float chance = GetSetting(setting);
+                if (rand.Next(0, 100) < chance)
+                {
+                    possibleTypes.Add(type);
+                }
+            }
+
+            if (possibleTypes.Count == 0) return "";
+
+            return possibleTypes[rand.Next(possibleTypes.Count)];
         }
 
         private static int PickNeg(Random rand)
@@ -426,19 +441,19 @@ namespace BeatblockLevelMaker
         private static void WriteSettings()
         {
             File.WriteAllText(settingsPath, "" +
-                "extra tap chance = 0.125" +
-                "\nblock chance = 0.25" +
-                "\nbounce chance = 0.375" +
-                "\nhold chance = 0.5" +
-                "\nmine hold chance = 0.625" +
-                "\nmine chance = 0.75" +
-                "\nside chance = 0.875" +
-                "\ninverse chance = 1" +
+                "extra tap chance = 100" +
+                "\nblock chance = 100" +
+                "\nbounce chance = 100" +
+                "\nhold chance = 100" +
+                "\nmine hold chance = 100" +
+                "\nmine chance = 100" +
+                "\nside chance = 100" +
+                "\ninverse chance = 100" +
                 "\nhas tap chance = 0.4" +
                 "\nhold angle difficulty = 70" +
                 "\nmax bounces = 1" +
                 "\nmax angle spread = 0" +
-                "\nrandom colors = 0");
+                "\nrandom colors = 1");
         }
 
         private static float GetSetting(string name)
