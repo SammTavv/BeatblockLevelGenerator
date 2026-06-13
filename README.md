@@ -16,14 +16,14 @@ MIDI tempo and swing changes won't affect note placements.
 
 ### Generator settings
 You can change the level generation settings by typing `s` in the console. Here are the available settings:
-- extra tap chance: the chance of an **Extra Tap** being placed (0-1)
-- block chance: the chance of a **Block** being placed (0-1)
-- bounce chance: the chance of a **Bounce** being placed (0-1)
-- hold chance: the chance of a **Hold** being placed (0-1)
-- mine hold chance: the chance of a **Minehold** being placed (0-1)
-- mine chance: the chance of a **Mine** being placed (0-1)
-- side chance: the chance of a **Side** being placed (0-1)
-- inverse chance: the chance of an **Inverse Block** being placed (0-1)
+- extra tap chance: the chance of an **Extra Tap** being placed (0-100)
+- block chance: the chance of a **Block** being placed (0-100)
+- bounce chance: the chance of a **Bounce** being placed (0-100)
+- hold chance: the chance of a **Hold** being placed (0-100)
+- mine hold chance: the chance of a **Minehold** being placed (0-100)
+- mine chance: the chance of a **Mine** being placed (0-100)
+- side chance: the chance of a **Side** being placed (0-100)
+- inverse chance: the chance of an **Inverse Block** being placed (0-100)
 - has tap chance: the chance of any note to require a press (0-1)
 - hold angle difficulty: the maximum rotation of a 0.5 beats **Hold**
 - max bounces: how many times **Bounce** notes have to bounce before the next note
