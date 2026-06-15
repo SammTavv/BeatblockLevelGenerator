@@ -47,7 +47,7 @@ namespace BeatblockLevelMaker
                 }
                 else
                 {
-                    Console.WriteLine($"Level loaded (Custom Levels/{levelPath.Split('\\').Last()}).");
+                    Console.WriteLine($"Level loaded: Custom Levels/{levelPath.Split('\\').Last()}");
                     canGenerate = true;
                 }
                 Console.ResetColor();
@@ -58,6 +58,43 @@ namespace BeatblockLevelMaker
                     "\nType \"s\" to open generator settings." +
                     "\nType \"g\" to reset generator settings." +
                     "\n\nNote: to view changes reload the Custom Levels page.");
+            }
+
+            if (page == 2)
+            {
+                // -- MIDI --
+                Intro();
+                Console.WriteLine("Insert the midi path (.mid):");
+
+                string midi = Console.ReadLine().Trim('"');
+
+                midiPath = Path.GetFullPath(midi);
+
+                File.Copy(midiPath, $@"{levelPath}\mus.mid", true);
+            }
+
+            if (page == 3)
+            {
+                // -- SONG --
+                Intro();
+                Console.WriteLine("Insert the song path (.ogg):");
+
+                string song = Console.ReadLine().Trim('"');
+
+                songPath = Path.GetFullPath(song);
+
+                File.Copy(songPath, $@"{levelPath}\mus.ogg", true);
+
+                // -- BPM --
+                Intro();
+                Console.WriteLine("Insert the song BPM:");
+
+                string bpmInput = Console.ReadLine();
+
+                float bpm = float.Parse(bpmInput);
+
+                File.AppendAllText($@"{levelPath}\level.json", $"" +
+                    $"{{\"events\":[{{\"angle\":0,\"bpm\":{bpm},\"file\":\"mus.ogg\",\"time\":0,\"type\":\"play\",\"volume\":1}}\r\n,");
             }
         }
         private static void BeginMenu()
@@ -136,35 +173,10 @@ namespace BeatblockLevelMaker
                     Process.Start(psi);
 
                     // -- MIDI --
-                    Intro();
-                    Console.WriteLine("Insert the midi path (.mid):");
-
-                    string midi = Console.ReadLine().Trim('"');
-
-                    midiPath = Path.GetFullPath(midi);
-
-                    File.Copy(midiPath, $@"{levelPath}\mus.mid", true);
+                    Intro(2);
 
                     // -- SONG --
-                    Intro();
-                    Console.WriteLine("Insert the song path (.ogg):");
-
-                    string song = Console.ReadLine().Trim('"');
-
-                    songPath = Path.GetFullPath(song);
-
-                    File.Copy(songPath, $@"{levelPath}\mus.ogg", true);
-
-                    // -- BPM --
-                    Intro();
-                    Console.WriteLine("Insert the song BPM:");
-
-                    string bpmInput = Console.ReadLine();
-
-                    float bpm = float.Parse(bpmInput);
-
-                    File.AppendAllText($@"{levelPath}\level.json", $"" +
-                        $"{{\"events\":[{{\"angle\":0,\"bpm\":{bpm},\"file\":\"mus.ogg\",\"time\":0,\"type\":\"play\",\"volume\":1}}\r\n,");
+                    Intro(3);
 
                     // -- USING BEATTOOLS --
                     /*Intro();
@@ -194,6 +206,18 @@ namespace BeatblockLevelMaker
             CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
             if (showMenu) BeginMenu();
+
+            if (!File.Exists(midiPath))
+            {
+                Intro();
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("MIDI path unavailable.\nRestart the program to select a new level.");
+                Console.ResetColor();
+                File.Delete("path.txt");
+                Console.ReadLine();
+
+                return;
+            }
 
             canPlaceFirst = true;
             lastAngle = null;
@@ -231,7 +255,7 @@ namespace BeatblockLevelMaker
                 {
                     time = currTime,
                     angle = PickAngle(rand),
-                    type = PickNoteType(rand)
+                    type = PickNoteType(rand, midiNotes[i].Channel)
                 };
 
                 switch (note.type)
@@ -249,7 +273,7 @@ namespace BeatblockLevelMaker
                             float delay = window / bounces;
                             note.bounces = bounces;
                             note.delay = delay;
-                            note.tap = PickBool(rand);
+                            note.tap = CanTap(rand);
                             note.rotation = 0;
                             skiptime = currTime + (bounces * delay);
                             break;
@@ -330,6 +354,18 @@ namespace BeatblockLevelMaker
                     canGenerate = false;
                     Intro(1);
                 }
+
+                /*if (inp == "cm")
+                {
+                    canGenerate = false;
+                    Intro(2);
+                }
+
+                if (inp == "cs")
+                {
+                    canGenerate = false;
+                    Intro(3);
+                }*/
             }
         }
 
@@ -340,11 +376,13 @@ namespace BeatblockLevelMaker
 
             return (double)note.Time / ticksPerBeat;
         }
-        private static string PickNoteType(Random rand)
+        private static string PickNoteType(Random rand, int channel)
         {
-            (string, string)[] noteTypes =
-            [
-                ("extraTap", "extra tap chance"),
+            if (GetSetting("use midi channels") != 1)
+            {
+                (string, string)[] noteTypes =
+                [
+                    ("extraTap", "extra tap chance"),
                 ("block", "block chance"),
                 ("bounce", "bounce chance"),
                 ("hold", "hold chance"),
@@ -352,22 +390,38 @@ namespace BeatblockLevelMaker
                 ("mine", "mine chance"),
                 ("side", "side chance"),
                 ("inverse", "inverse chance")
-            ];
+                ];
 
-            List<string> possibleTypes = [];
+                List<string> possibleTypes = [];
 
-            foreach (var (type, setting) in noteTypes)
-            {
-                float chance = GetSetting(setting);
-                if (rand.Next(0, 100) < chance)
+                foreach (var (type, setting) in noteTypes)
                 {
-                    possibleTypes.Add(type);
+                    float chance = GetSetting(setting);
+                    if (rand.Next(0, 100) < chance)
+                    {
+                        possibleTypes.Add(type);
+                    }
                 }
+
+                if (possibleTypes.Count == 0) return "";
+
+                return possibleTypes[rand.Next(possibleTypes.Count)];
             }
-
-            if (possibleTypes.Count == 0) return "";
-
-            return possibleTypes[rand.Next(possibleTypes.Count)];
+            else
+            {
+                return channel switch
+                {
+                    0 => "block",
+                    1 => "bounce",
+                    2 => "hold",
+                    3 => "mineHold",
+                    4 => "mine",
+                    5 => "side",
+                    6 => "inverse",
+                    7 => "extraTap",
+                    _ => "block"
+                };
+            }
         }
 
         private static int PickNeg(Random rand)
@@ -378,7 +432,7 @@ namespace BeatblockLevelMaker
                 return -1;
         }
 
-        private static bool PickBool(Random rand) => rand.NextDouble() < GetSetting("has tap chance");
+        private static bool CanTap(Random rand) => rand.NextDouble() < GetSetting("has tap chance");
 
         private static float? lastAngle = null;
         private static float PickAngle(Random rand)
@@ -416,8 +470,8 @@ namespace BeatblockLevelMaker
             switch (note.type)
             {
                 case "hold":
-                    note.startTap = PickBool(rand);
-                    note.endTap = PickBool(rand);
+                    note.startTap = CanTap(rand);
+                    note.endTap = CanTap(rand);
 
                     //note.angle = (float)(rand.NextDouble() * 360);
                     diff = note.duration.Value / 0.5f * holdLeniency;
@@ -433,7 +487,7 @@ namespace BeatblockLevelMaker
                 case "block":
                 case "inverse":
                 case "side":
-                    note.tap = PickBool(rand);
+                    note.tap = CanTap(rand);
                     break;
             }
         }
@@ -453,7 +507,8 @@ namespace BeatblockLevelMaker
                 "\nhold angle difficulty = 70" +
                 "\nmax bounces = 1" +
                 "\nmax angle spread = 0" +
-                "\nrandom colors = 1");
+                "\nrandom colors = 1" +
+                "\nuse midi channels = 0");
         }
 
         private static float GetSetting(string name)
