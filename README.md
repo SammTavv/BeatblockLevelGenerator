@@ -41,7 +41,6 @@ These are what every MIDI channel represents if the `use midi channels` setting 
 - 5: **Side**
 - 6: **Inverse**
 - 7: **Extra Tap**
-If your DAW starts at 1, just add 1 to your desired channel (for example MIDI channel 3 is the **Hold** note)
 
 ### Extra
 In the release i included a demo level made with Beatblock Level Generator using the default settings. You can copy the midi and song files to test how it works!\
